@@ -1,4 +1,4 @@
-import { View, Text, button, TextInput, StyleSheet, Image } from "react-native";
+import { View, Text, button, TextInput } from "react-native";
 import React from "react";
 
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
@@ -9,16 +9,16 @@ import {
   DrawerItemList,
   DrawerItem,
 } from "@react-navigation/drawer";
-import { Button , SafeAreaView } from "react-native-web";
-import HomeScreen from "./screen/HomeScreen_Drawer";
+import { Button } from "react-native-web";
 
 const MyTheme = {
   ...DefaultTheme,
-  colors: {
+  colors: { 
     ...DefaultTheme.colors,
-    primary: "rgb(255,233,11)",
-  },
+    primary:'rgb(255,4,85)'
+  }
 };
+
 
 function Feed({ navigation }) {
   return (
@@ -32,27 +32,18 @@ function Feed({ navigation }) {
 
 function CustomDrawerContent(props) {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <DrawerContentScrollView {...props}>
-        <Image
-          source={require("./assets/react_logo.png")}
-          style={styles.sideMenuProfileIcon}
-        />
-        <DrawerItemList {...props} />
-        <DrawerItem
-          label="Notification"
-          onPress={() => alert("Link to help")}
-        />
-        <DrawerItem
-          label="Close Drawer"
-          onPress={() => props.navigation.closeDrawer()}
-        />
-        <DrawerItem
-          label="Toggle Drawer"
-          onPress={() => props.navigation.toggleDrawer()}
-        />
-      </DrawerContentScrollView>
-    </SafeAreaView>
+    <DrawerContentScrollView {...props}>
+      <DrawerItemList {...props} />
+      <DrawerItem label="Notification" onPress={() => alert("Link to help")} />
+      <DrawerItem
+        label="Close Drawer"
+        onPress={() => props.navigation.closeDrawer()}
+      />
+      <DrawerItem
+        label="Toggle Drawer"
+        onPress={() => props.navigation.toggleDrawer()}
+      />
+    </DrawerContentScrollView>
   );
 }
 
@@ -70,7 +61,7 @@ function MyDrawer() {
         },
       }}
     >
-      <Drawer.Screen name="Home" component={HomeScreen} />
+      <Drawer.Screen name="Feed" component={Feed} />
     </Drawer.Navigator>
   );
 }
@@ -84,13 +75,3 @@ const App = () => {
 };
 
 export default App;
-
-const styles = StyleSheet.create({
-  sideMenuProfileIcon: {
-    resizeMode: "center",
-    width: 100,
-    height: 100,
-    borderRadius: 100 / 2,
-    alignSelf: "center",
-  },
-});
