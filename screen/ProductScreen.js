@@ -1,49 +1,106 @@
-
-import {View, Text, StyleSheet, FlatList, ActivityIndicator, Image} from "react-native";
-import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  Image,
+  SafeAreaView,
+  TouchableOpacity,
+} from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 
 
-const _renderItems = ({ item }) => {
+const ItemSeparatorView = () => {
   return (
-    <View style={styles.container}>
-      <View>
-        <Image
-          // resizeMode='center'
-          source={{ uri: item.picture }}
-          style={styles.thumbnail}
-        />
-      </View>
-      <View style={styles.dataContent}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.detail}>{item.detail}</Text>
-      </View>
-    </View>
+    // Flat List Item Separator
+    <View
+      style={{
+        height: 0.5,
+        width: "100%",
+        backgroundColor: "#C8C8C8",
+      }}
+    />
   );
 };
-const ItemSeparatorView = () => {
-    return (
-      // Flat List Item Separator
-      <View
-        style={{
-          height: 0.5,
-          width: "100%",
-          backgroundColor: "#C8C8C8",
-        }}
-      />
-    );
-  };
 
-const ProductScreen = () => {
+const ProductScreen = ({navigation}) => {
   const [product, setProduct] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const getData = async () => {
-    const res = await axios.get("https://api.codingthailand.com/api/course");
-    setProduct(res.data.data);
+    try {
+      setLoading(true);
+      const res = await axios.get("https://api.codingthailand.com/api/course");
+      setProduct(res.data.data);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      setError(error); //set errorr ไปที่ state ของ error ว่าเกิดจาก axios หรือ ตัวอื่น
+    }
   };
-  useEffect(() => {
+
+  useFocusEffect(
+    useCallback(() => {
+      getData();
+    }, [])
+  );
+  /*useEffect(() => {
     getData();
-  }, []);
+  }, []);*/
+
+  if (error) {
+    //ถ้ามี error เกิดขึ้นจาก return ui ต่อไปนี้กลับไป
+    return (
+      <View style={styles.container}>
+        <Text>{error.message}</Text>
+        <Text>เกิดข้อผิดพลาด ไม่สามารถติดต่อกับ server ได้</Text>
+      </View>
+    );
+  }
+
+  if (loading == true) {
+    return (
+      <View>
+        <ActivityIndicator color="#f4511e" size="large" />
+      </View>
+    );
+  }
+  const _renderItems = ({ item }) => {
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <TouchableOpacity
+          style={styles.addButtonStyle}
+          onPress= {() => {
+            navigation.navigate('Detail', {
+              id:item.id,
+              title:item.title
+            })
+          }}
+        >
+          <View style={styles.container}>
+            <View>
+              <Image
+                // resizeMode='center'
+                source={{ uri: item.picture }}
+                style={styles.thumbnail}
+              />
+            </View>
+            <View style={styles.dataContent}>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.detail}>{item.detail}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  };
+  const _onRefresh = () => {
+    getData();
+  };
 
   return (
     <View>
@@ -52,6 +109,8 @@ const ProductScreen = () => {
         keyExtractor={(item, index) => item.id.toString()}
         ItemSeparatorComponent={ItemSeparatorView}
         renderItem={_renderItems}
+        refreshing={loading}
+        onRefresh={_onRefresh}
       />
     </View>
   );
@@ -67,7 +126,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     flexDirection: "row",
     maeginHorizontal: 20,
-    margin: 5
+    margin: 5,
   },
   dataContainer: {
     flex: 1,
@@ -89,5 +148,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#777",
     fontWeight: 700,
+  },
+  addButtonStyle: {
+    width: "100%",
+    marginBottom: 15,
   },
 });
